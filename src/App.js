@@ -1,12 +1,24 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { db } from './firebase-config';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc,doc } from 'firebase/firestore';
 
 function App() {
   const [todos, setTodos] = useState([]);
-
+  const [title, setTitle] = useState([]);
+  const [description, setDescription] = useState([]);
+  const [newTitle, setNewTitle] = useState([]);
   const todosRef = collection(db, 'todos');
+
+  const addTodo = async () => {
+    await addDoc(todosRef, { title, description });
+  }
+  const updateTodo = async (id, title) => {
+    const todoDoc = doc(db,'todos', id)
+    // console.log(todoDoc)
+    updateDoc(todoDoc, {title:newTitle})
+  }
+
   useEffect(() => {
     const fetchTodos = async () => {
       const data = await getDocs(todosRef)
@@ -16,11 +28,17 @@ function App() {
   }, [])
 
   return (
-    <div className="App">
-      {todos.map((ele)=>{
-       return <p>{ele.title}</p>
-      })}
-    </div>
+    <><div>
+      Title<input onChange={(event) => setTitle(event.target.value)} />
+      Description<input onChange={(event) => setDescription(event.target.value)} />
+      <button onClick={addTodo}> Add todo</button>
+    </div><div className="App">
+        {todos.map((ele) => {
+          return <div key={ele.id}><p >{ele.title}</p>
+            <input onChange={(event) => setNewTitle(event.target.value)} />
+            <button onClick={() => updateTodo(ele.id, ele.title)}>UpdateTodo</button></div>
+        })}
+      </div></>
   );
 }
 
