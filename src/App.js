@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { db } from './firebase-config';
-import { collection, getDocs, addDoc, updateDoc,doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -14,9 +14,13 @@ function App() {
     await addDoc(todosRef, { title, description });
   }
   const updateTodo = async (id, title) => {
-    const todoDoc = doc(db,'todos', id)
+    const todoDoc = doc(db, 'todos', id)
     // console.log(todoDoc)
-    updateDoc(todoDoc, {title:newTitle})
+    updateDoc(todoDoc, { title: newTitle })
+  }
+  const deleteTodo = async (id) => {
+    const todoDoc = doc(db, 'todos', id)
+    await deleteDoc(todoDoc)
   }
 
   useEffect(() => {
@@ -36,7 +40,9 @@ function App() {
         {todos.map((ele) => {
           return <div key={ele.id}><p >{ele.title}</p>
             <input onChange={(event) => setNewTitle(event.target.value)} />
-            <button onClick={() => updateTodo(ele.id, ele.title)}>UpdateTodo</button></div>
+            <button onClick={() => updateTodo(ele.id, ele.title)}>UpdateTodo</button>
+            <button onClick={() => deleteTodo(ele.id)}>DeleteTodo</button>
+            </div>
         })}
       </div></>
   );
