@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getAuth, signOut } from "firebase/auth";
 import { db } from '../../firebase-config';
 import { collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 
@@ -8,6 +9,7 @@ function Home() {
   const [description, setDescription] = useState([]);
   const [newTitle, setNewTitle] = useState([]);
   const todosRef = collection(db, 'todos');
+  const auth = getAuth();
 
   const addTodo = async () => {
     await addDoc(todosRef, { title, description });
@@ -31,6 +33,9 @@ function Home() {
 
   return (
     <><div>
+      <button onClick={() => {
+        signOut(auth)
+      }}>Logout</button>
       Title<input onChange={(event) => setTitle(event.target.value)} />
       Description<input onChange={(event) => setDescription(event.target.value)} />
       <button onClick={addTodo}> Add todo</button>
@@ -40,7 +45,7 @@ function Home() {
             <input onChange={(event) => setNewTitle(event.target.value)} />
             <button onClick={() => updateTodo(ele.id, ele.title)}>UpdateTodo</button>
             <button onClick={() => deleteTodo(ele.id)}>DeleteTodo</button>
-            </div>
+          </div>
         })}
       </div></>
   );

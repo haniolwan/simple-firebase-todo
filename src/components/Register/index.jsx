@@ -1,12 +1,7 @@
 import {
-    signInWithEmailAndPassword
+    getAuth,
+    createUserWithEmailAndPassword
 } from "firebase/auth";
-import {
-    getAuth
-} from "firebase/auth";
-
-
-// import { auth } from "../../firebase-config";
 import {
     Form,
     Input,
@@ -16,24 +11,31 @@ import {
 } from 'antd';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { db } from "../../firebase-config";
+import { addDoc, collection } from "firebase/firestore";
 const { Title } = Typography;
 
-const Login = () => {
+const Register = () => {
     const navigate = useNavigate();
+    const auth = getAuth();
     const [userInfo, setUserInfo] = useState({
         email: '', password: '',
     });
-    const auth = getAuth();
 
     const handleChange = ({ target: { name, value } }) => {
         setUserInfo({ ...userInfo, [name]: value });
     };
 
-    const logInWithEmailAndPassword = async ({ email, password }) => {
+    const registerUser = async ({ email, password }) => {
         try {
-            console.log(email, password)
-            await signInWithEmailAndPassword(auth, email, password);
+            const res = await createUserWithEmailAndPassword(auth, email, password);
+            const user = res.user;
+            await addDoc(collection(db, "users"), {
+                uid: user.uid,
+                name: user.displayName,
+                authProvider: "local",
+                email,
+            })
             message.success("Hi User")
             navigate('/home')
         } catch (err) {
@@ -43,13 +45,13 @@ const Login = () => {
 
     return (
         <section className="login_form">
-            <Title className="login_text">Login</Title>
+            <Title className="login_text">Register</Title>
             <Form
                 name="basic"
                 labelCol={{ span: 8 }}
                 wrapperCol={{ span: 16 }}
                 initialValues={{ remember: true }}
-                onFinish
+                onFinish={() => registerUser(userInfo)}
                 autoComplete="off"
             >
                 <Form.Item
@@ -79,7 +81,7 @@ const Login = () => {
                     <Button
                         type="primary"
                         htmlType="submit"
-                        onClick={() => logInWithEmailAndPassword(userInfo)}
+
                     >
                         Login
                     </Button>
@@ -89,4 +91,4 @@ const Login = () => {
     )
 }
 
-export default Login;
+export default Register;
