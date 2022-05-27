@@ -1,6 +1,7 @@
 import {
     getAuth,
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword
 } from "firebase/auth";
 import {
     Form,
@@ -10,12 +11,12 @@ import {
     message
 } from 'antd';
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { db } from "../../firebase-config";
 import { addDoc, collection } from "firebase/firestore";
 const { Title } = Typography;
 
-const Register = () => {
+const SignForm = ({ type }) => {
     const navigate = useNavigate();
     const auth = getAuth();
     const [userInfo, setUserInfo] = useState({
@@ -42,16 +43,26 @@ const Register = () => {
             message.error(err.message)
         }
     };
+    const LoginUser = async ({ email, password }) => {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            message.success('Hi User')
+            navigate('/home')
+        } catch (err) {
+            message.error(err.message)
+        }
+    };
 
     return (
         <section className="login_form">
-            <Title className="login_text">Register</Title>
+            <Title>Welcome to Todo</Title>
+            <Title className="login_text">{type === 'login' ? "LOGIN" : "REGISTER"}</Title>
             <Form
                 name="basic"
                 labelCol={{ span: 8 }}
                 wrapperCol={{ span: 16 }}
                 initialValues={{ remember: true }}
-                onFinish={() => registerUser(userInfo)}
+                onFinish={() => type === 'login' ? LoginUser(userInfo) : registerUser(userInfo)}
                 autoComplete="off"
             >
                 <Form.Item
@@ -83,12 +94,13 @@ const Register = () => {
                         htmlType="submit"
 
                     >
-                        Login
+                        {type === 'login' ? "Login" : "Register"}
                     </Button>
+                    {"   "} <Link to={type !== 'login' ? "/login" : "/register"}>{type !== 'login' ? "Login" : "Register"}</Link>
                 </Form.Item>
             </Form>
         </section>
     )
 }
 
-export default Register;
+export default SignForm;
