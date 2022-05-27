@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getAuth, signOut } from "firebase/auth";
 import { db } from '../../firebase-config';
 import { collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { message } from 'antd';
 
 function Home() {
   const [todos, setTodos] = useState([]);
@@ -13,6 +14,7 @@ function Home() {
 
   const addTodo = async () => {
     await addDoc(todosRef, { title, description });
+    setTodos([...todos, { id: todosRef.id, title, description }]);
   }
   const updateTodo = async (id, title) => {
     const todoDoc = doc(db, 'todos', id)
@@ -21,6 +23,11 @@ function Home() {
   const deleteTodo = async (id) => {
     const todoDoc = doc(db, 'todos', id)
     await deleteDoc(todoDoc)
+    const newTodos = todos.filter((todo) => {
+      return todo.id !== id
+    })
+    setTodos(newTodos)
+    message.success("Todo deleted successfully")
   }
 
   useEffect(() => {
